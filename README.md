@@ -8,23 +8,29 @@ _files inside_
    - 3000 rows of data, 19 columns
    - **.csv** tab-limited
 
-2. FORMATEADO MAGENTA -Electric_Vehicle_Population_Data_modified_2024-04-27_091029 - Copy.xlsx
+2. newColumnsGreen-Electric_Vehicle_Population_Data_modified_2024-04-27_091029.xlsx
     - excel **.xlsx file** with tabs
     - 166 801 rows, 19 columns 
-    - orange + Base MSRP column modified, Descuentos column, Precio Final column
+    - green + Base MSRP column modified, Descuentos column, Precio Final column
 
-3. Electric_Vehicle_Population_Data_modified_2024-04-27_091029.csv
+3. newColumns_Electric_Vehicle_Population_Data_2024-04-27_091029.csv
     - **.csv file** with tabs
     - 166 801 rows, 19 columns
     - each column is separated by different column (not like the just comas on the raw data version)
     - Base MSRP column modified, Descuentos column, Precio Final column
-    
-4. RAW BLUE - Electric_Vehicle_Population_Data.csv
-    - **.csv file**
+
+4. rawVisualBlue- Electric_Vehicle_Population_Data.xlsx
+    - excel **.xlsx file** with tabs
+    - 166 801 rows, 17 columns 
+    - blue, raw data, not added columns
+    - only purpose is to visualize original raw data orderly
+ 
+5. raw_Electric_Vehicle_Population_Data.csv
+    - **.csv file**, comma delimited
     - 166 801 rows, 17 columns
-    - file gotten from kaggle, not added columns, only modification from the original file of kaggle website is each column it's on its own rather than separated by comas
+    - file gotten from kaggle, not added columns, original delimitor
     
-5. RAW-Electric_Vehicle_Population_Data archive.zip
+6. raw_Electric_Vehicle_Population_Data archive.zip'
 ### `D:\@ziajoriii7\wattzfinder\data\RAW-Electric_Vehicle_Population_Data archive` 
 (gotten from the zip, no modifications, straight from kaggle)
 
@@ -44,11 +50,12 @@ _files inside_
    - add 2 New columns based on `Base MSRP` column: a. Descuentos b. Precio Final
    - outputs as .csv
    - name: {originalName}_modified_{date-hour}.csv
+
 2. convert_excel_to_csv.py
-   - convert a .xslx file into a .csv
+   - convert a .xlsx file into a .csv
    - use argument as input file
    - outputs as .csv
-   - name: {originalName}.csv (only .xslx entension is changed to .csv)
+   - name: {originalName}.csv (only .xlsx entension is changed to .csv)
  
 3. cut_csv_to_3000rows.py
     - use pandas to cut until 3000 rows of data
@@ -57,3 +64,6 @@ _files inside_
     - outputs as tabbed .csv
     - name: {originalName}_cut.csv
   
+
+
+
