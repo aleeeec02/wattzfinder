@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 
 
-def cargar_datos(ruta_archivo):
+def cargar_datos(file_path):
     try:
-        return pd.read_csv(ruta_archivo, delimiter=';')
+        return pd.read_csv(file_path, delimiter=';')
     except Exception as e:
         st.error(f"No se pudieron cargar los datos: {e}")
         return pd.DataFrame()
@@ -22,29 +22,30 @@ def construir_grafo(df):
             G.add_edge(df.iloc[i]['VIN (1-10)'], df.iloc[j]['VIN (1-10)'], weight=peso)
     return G
 
-def dijkstra_recomendaciones(G, vin_inicio):
+def dijkstra_algo(G, vin_inicio):
     longitudes_camino = nx.single_source_dijkstra_path_length(G, source=vin_inicio, weight='weight')
     carros_ordenados = sorted(longitudes_camino.items(), key=lambda x: x[1])
     return carros_ordenados[1:6]
 
 
+
 def main():
     st.title('Wattzfinder: Sistema de Recomendación de Vehículos Eléctricos')
-    ruta_archivo_datos = '../data/Electric_Vehicle_Population_Data_3000_FINAL.csv'  
-    df = cargar_datos(ruta_archivo_datos)
+    file_path_datos = '../data/Electric_Vehicle_Population_Data_3000_FINAL.csv'  
+    df = cargar_datos(file_path_datos)
 
     if not df.empty:
         G = construir_grafo(df)
         vin_seleccionado = st.selectbox('Seleccione un VIN de vehículo:', df['VIN (1-10)'].unique())
         if st.button('Buscar vehículos similares'):
-            recomendaciones = dijkstra_recomendaciones(G, vin_seleccionado)
+            recomendaciones = dijkstra_algo(G, vin_seleccionado)
             st.write("Vehículos recomendados según la similitud en MSRP:")
             for vin, diferencia in recomendaciones:
                 st.write(f"VIN: {vin}, Diferencia de MSRP: ${diferencia}")
 
         fig, ax = plt.subplots()
         pos = nx.spring_layout(G)
-        nx.draw(G, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=500, ax=ax)
+        nx.draw(G, pos, with_labels=True, node_color='deepskyblue', edge_color='magenta', node_size=500, ax=ax)
         st.pyplot(fig)
 
     else:
