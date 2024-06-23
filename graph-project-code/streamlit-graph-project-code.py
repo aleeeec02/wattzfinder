@@ -14,21 +14,21 @@ def cargar_datos(num_rows=100):
     url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
 
     try:
-        df = pd.read_csv(local_path, delimiter=';', nrows=num_rows)
-        st.success("Datos cargados desde archivo local.")
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        df = pd.read_csv(url, delimiter=';', nrows=num_rows)
+        st.success("Datos cargados desde GitHub.")
         return df
-    except Exception as e:
-        st.warning(f"No se pudieron cargar los datos locales: {e}. Intentando cargar datos desde GitHub...")
-
+    except requests.RequestException:
+        st.warning("No se pudo acceder a los datos en línea. Intentando cargar datos locales...")
         try:
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            df = pd.read_csv(url, delimiter=';', nrows=num_rows)
-            st.success("Datos cargados desde GitHub.")
+            df = pd.read_csv(local_path, delimiter=';', nrows=num_rows)
+            st.success("Datos cargados desde archivo local.")
             return df
-        except requests.RequestException as e:
-            st.error(f"No se pudo acceder a los datos en línea: {e}")
+        except Exception as e:
+            st.error(f"No se pudieron cargar los datos locales: {e}")
             return pd.DataFrame()
+
 
 
 def construir_grafo(df):
@@ -198,16 +198,29 @@ def main():
                 
                 fig = visualizar_grafo(G, comunidades=comunidades)
                 st.pyplot(fig)
-        
         elif opcion == "Vecinos Más Cercanos":
             if st.button('Encontrar Vecinos Más Cercanos'):
                 vecinos = vecinos_mas_cercanos(G, vin_seleccionado)
                 st.write("Vecinos más cercanos:")
+
                 for vin, distancia in vecinos:
-                    st.write(f"VIN: {vin}, Distancia: {distancia:.2f}")
-                
+                    with st.expander(f"VIN: {vin} - Distancia: {distancia:.2f}"):
+                        vehiculo = df[df['VIN (1-10)'] == vin].iloc[0]
+                        st.write(f"**VIN:** {vin}")
+                        st.write(f"**Distancia:** {distancia:.2f} millas")
+                        st.write(f"**Marca:** {vehiculo['Make']}")
+                        st.write(f"**Modelo:** {vehiculo['Model']}")
+                        st.write(f"**Año:** {vehiculo['Model Year']}")
+                        st.write(f"**Autonomía Eléctrica:** {vehiculo['Electric Range']} millas")
+                        st.write(f"**Precio Base:** ${vehiculo['Base MSRP']:,.2f}")
+                        st.write(f"**Ciudad:** {vehiculo['City']}")
+                        st.write(f"**Estado:** {vehiculo['State']}")
+                        st.write(f"**Tipo de Vehículo Eléctrico:** {vehiculo['Electric Vehicle Type']}")
+
                 fig = visualizar_grafo(G, destacados=[vin for vin, _ in vecinos] + [vin_seleccionado])
                 st.pyplot(fig)
+
+
     
     else:
         st.error("Los datos no están disponibles.")
