@@ -2,7 +2,7 @@
 
 
 ## data to process
-### `D:\@ziajoriii7\wattzfinder\data`
+### `D:\@USER\wattzfinder\data`
 _files inside_
 
 1. Electric_Vehicle_Population_Data_3000_FINAL.csv
@@ -32,7 +32,7 @@ _files inside_
     - file gotten from kaggle, not added columns, original delimitor
     
 6. raw_Electric_Vehicle_Population_Data archive.zip'
-### `D:\@ziajoriii7\wattzfinder\data\RAW-Electric_Vehicle_Population_Data archive` 
+### `D:\@USER\wattzfinder\data\RAW-Electric_Vehicle_Population_Data archive` 
 (gotten from the zip, no modifications, straight from kaggle)
 
 _files inside_
@@ -46,7 +46,7 @@ _files inside_
 
 
 ## scripts to process data
-### `D:\@ziajoriii7\wattzfinder\scripts-to-process-data`
+### `D:\@USER\wattzfinder\scripts-to-process-data`
 _files inside_
 
 1. add_2NewColumns_modify1Column_csv.py
