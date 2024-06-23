@@ -6,6 +6,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage{geometry}
 \geometry{a4paper}
+\usepackage[spanish]{babel}
+\renewcommand{\contentsname}{Índice}
 \usepackage{graphicx}
 \usepackage{hyperref}
 
@@ -26,6 +28,8 @@
 
 \newcommand{\inlinecode}[1]{\colorbox{alice}{\mintinline[escapeinside=||]{python}{#1}}}
 
+\renewcommand\listoflistingscaption{Lista de códigos Python}
+
 \usepackage{luacode}
 \usepackage[us,12hr]{datetime} 
 
@@ -40,29 +44,48 @@ end
 
 \newdateformat{myformat}{\monthname[\THEMONTH] \THEDAY, \THEYEAR; \adjustedtime{-0}}
 
-
-
-
-\title{\textbf{Trabajo Final} \\ Curso: Complejidad Algorítmica}
-\author{
-  \textbf{Universidad Peruana de Ciencias Aplicadas}\\\\
-  Sección: CC41\\
-  Docente: Abraham Sopla Maslucán\\\\
-  Integrantes:\\
-  Ruiz Torres, Erick Hérnan (u202118946)\\
-  Alcántara Cruz Rodrigo Alonso(u202216698)\\
-  Conza Hualpa, Alexia Evelyn (u202118038)
-}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage[T1]{fontenc}
+\usepackage{charter}
+\usepackage[spanish]{babel}
 
 \date{\myformat\today}
 
+\titleformat{\section}
+  {\Large\bfseries}
+  {\thesection}
+  {1em}
+  {}
+
+\pretitle{\begin{center}\LARGE}
+\posttitle{\end{center}}
+
+\title{\textbf{Trabajo Final:} \\ Curso de Complejidad Algorítmica}
+\author{
+  \textbf{Universidad Peruana de Ciencias Aplicadas}\\[1ex]
+  Sección: CC41 \\
+  Docente: Abraham Sopla Maslucán \\[2ex]
+  Integrantes: \\
+  Ruiz Torres, Erick Hérnan (u202118946) \\
+  Alcántara Cruz Rodrigo Alonso (u202216698) \\
+  Conza Hualpa, Alexia Evelyn (u202118038)
+}
+\date{\myformat\today}
 
 \begin{document}
 
 \maketitle
-\newpage
+\thispagestyle{empty} 
+\newpage 
+
 \tableofcontents
+\newpage 
+
+\listoflistings
 \newpage
+
+
 
 \section{Descripción del problema}
 El problema que veremos a cabo en este proyecto se enfoca en las recomendaciones de autos eléctricos, el objetivo es brindar a todos los usuarios sugerencias personalizadas de autos en base a características como precio, año, modelo, etc. La recomendación de estos vehículos es fundamental en la venta online ya que ayuda a los usuarios a obtener su auto adecuado en base a sus necesidades. Como menciona Pigna (2023):
@@ -103,15 +126,16 @@ Luego se traduce los nombres de las columnas para tener una base de datos más o
 Uno de los principales problemas de nuestra Dataset sacada de Kaggle es que en la columna de Precios la mayoría valores son = 0, lo cual no tendría sentido para nuestro sistema de recomendación de carros electrónicos, por lo que en el siguiente código se extraerán y reemplazarán los precios que son = 0 con los datos originales de Kaggle que != 0, se utilizarán los datos previos y se distribuirán en las filas necesarias de manera aleatoria, a su vez se utilizará percentiles para mantener la distribución general de precios de la dataset original y completar la mayoría de datos vacíos en la columna Precios.
 
 
-Luego se generarán 2 columnas adicionales por el mismo código “Descuentos” y “Precio Final”, los descuentos se agregarán desde un 8\% hasta un 40\%, este descuento solo se aplicará a las filas con datos generados en Precios, es decir que los datos sacados en la dataset de Kaggle tendrán un descuento de 0\%, esto se hará con el motivo que luego puedan ser identificables y observar si hay una correlación imprevista cuando hagamos el análisis final de nuestro proyecto y corregir si existe un error. 
-
-Aparte de utilizar la bibliotecas `pandas` para los procesos relacionados con el archivo csv, se utilizará ‘numpy’ para el procesamiento de números en las 3 columnas modificadas en cuanto a la aleatoriedad y los percentiles.
-
-En cuánto al código en general se utilizará las bibliotecas ‘sys’ y ‘datetime’ para traspasar el archivo con el script python como argumento y modificar su nombre con la fecha respectiva del procesamiento de datos.
-
-El código python es el siguiente:
+Luego se generarán dos columnas adicionales por el mismo código: ``Descuentos'' y ``Precio Final''. Los descuentos se agregarán en un rango del 8\% al 40\%, y este descuento solo se aplicará a las filas con datos generados en la columna Precios. Es decir, los datos extraídos del dataset de Kaggle tendrán un descuento del 0\%. Este procedimiento se realiza con el propósito de que luego puedan ser identificables y permitir observar si existe alguna correlación imprevista cuando realicemos el análisis final de nuestro proyecto y, en su caso, corregir si existe algún error.
 
 
+Aparte de utilizar la biblioteca \texttt{pandas} para los procesos relacionados con el archivo CSV, se utilizará \texttt{numpy} para el procesamiento de números en las 3 columnas modificadas en cuanto a la aleatoriedad y los percentiles.
+
+En cuanto al código en general, se utilizarán las bibliotecas \texttt{sys} y \texttt{datetime} para traspasar el archivo con el script Python como argumento y modificar su nombre con la fecha respectiva del procesamiento de datos.
+
+El código Python es el siguiente:
+
+\begin{listing}[H]
 \inputminted[
     frame=lines,
     framesep=2mm,
@@ -120,7 +144,11 @@ El código python es el siguiente:
     fontsize=\footnotesize,
     linenos
 ]{python}{../scripts-to-process-data/add-2NewColumns-modify1Column.py}
-\\
+\caption{Python script para agregar dos columnas nuevas y modificar una columna en una dataset.}
+\label{lst:add-2NewColumns-modify1Column}
+\end{listing}
+
+
 
 \subsubsection{Características de los nodos}
 
@@ -246,7 +274,7 @@ Se hará el uso de las siguientes librerías:
     \item Porcentaje de Usuarios que realizan compras basadas en Recomendaciones Personalizadas.
     \item Tiempo Promedio empleado en Búsqueda y recomendaciones calculando el tiempo medio que los usuario pasan desde que ingresan al sistema hasta que encuentren el vehículo finalmente comprado.
 \end{enumerate}
-\subsection{Big O \- evaluacion con tiempos}
+\subsection{Big O - evaluacion con tiempos}
 tomar capturas de pantalla y calcular con diferentes soluciones y cantidad de nodos.
 
 \subsection{Mejora continua y Evaluación de Feedback}
