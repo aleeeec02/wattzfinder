@@ -7,14 +7,31 @@ import numpy as np
 import time
 
 
-@st.cache_data
-def cargar_datos(file_path, num_rows=500):
+import requests
+url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
+
+
+def cargar_datos(num_rows=100):
+    url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
+    local_path = os.path.join('..', 'data', 'Electric_Vehicle_Population_Data_3000_FINAL.csv')
+
     try:
-        df = pd.read_csv(file_path, delimiter=';', nrows=num_rows)
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        df = pd.read_csv(url, delimiter=';', nrows=num_rows)
+        st.success("Datos cargados desde GitHub.")
         return df
-    except Exception as e:
-        st.error(f"No se pudieron cargar los datos: {e}")
-        return pd.DataFrame()
+    except requests.RequestException:
+        st.warning("No se pudo acceder a los datos en línea. Intentando cargar datos locales...")
+        try:
+            df = pd.read_csv(local_path, delimiter=';', nrows=num_rows)
+            st.success("Datos cargados desde archivo local.")
+            return df
+        except Exception as e:
+            st.error(f"No se pudieron cargar los datos locales: {e}")
+            return pd.DataFrame()
+
+
 
 def construir_grafo(df):
     G = nx.Graph()
