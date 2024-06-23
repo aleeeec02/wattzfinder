@@ -1,0 +1,7 @@
+pandas
+networkx
+streamlit
+matplotlib
+python-louvain
+numpy
+seaborn
