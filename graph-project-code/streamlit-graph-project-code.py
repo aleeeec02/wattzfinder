@@ -5,10 +5,8 @@ import matplotlib.pyplot as plt
 from community import community_louvain
 import numpy as np
 import time
-
-
 import requests
-url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
+import os
 
 
 def cargar_datos(num_rows=100):
@@ -30,7 +28,6 @@ def cargar_datos(num_rows=100):
         except Exception as e:
             st.error(f"No se pudieron cargar los datos locales: {e}")
             return pd.DataFrame()
-
 
 
 def construir_grafo(df):
@@ -123,7 +120,6 @@ def visualizar_grafo(G, destacados=None, comunidades=None):
 def main():
     st.title('Wattzfinder: Sistema de Recomendación de Vehículos Eléctricos')
     
-    file_path_datos = '../data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
 
     st.sidebar.header("Configuración de Datos")
     num_rows = st.sidebar.slider('Número de filas a cargar', min_value=10, max_value=3000, value=500, step=100)
@@ -132,7 +128,7 @@ def main():
     carga_mensaje.info(f"Cargando {num_rows} filas de datos...")
 
 
-    df = cargar_datos(file_path_datos, num_rows=num_rows)
+    df = cargar_datos(num_rows=num_rows)
     time.sleep(1)
 
 
