@@ -10,23 +10,24 @@ import os
 
 
 def cargar_datos(num_rows=100):
-    url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
     local_path = os.path.join('..', 'data', 'Electric_Vehicle_Population_Data_3000_FINAL.csv')
+    url = 'https://raw.githubusercontent.com/aleeeec02/wattzfinder/main/data/Electric_Vehicle_Population_Data_3000_FINAL.csv'
 
     try:
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        df = pd.read_csv(url, delimiter=';', nrows=num_rows)
-        st.success("Datos cargados desde GitHub.")
+        df = pd.read_csv(local_path, delimiter=';', nrows=num_rows)
+        st.success("Datos cargados desde archivo local.")
         return df
-    except requests.RequestException:
-        st.warning("No se pudo acceder a los datos en línea. Intentando cargar datos locales...")
+    except Exception as e:
+        st.warning(f"No se pudieron cargar los datos locales: {e}. Intentando cargar datos desde GitHub...")
+
         try:
-            df = pd.read_csv(local_path, delimiter=';', nrows=num_rows)
-            st.success("Datos cargados desde archivo local.")
+            response = requests.get(url, timeout=5)
+            response.raise_for_status()
+            df = pd.read_csv(url, delimiter=';', nrows=num_rows)
+            st.success("Datos cargados desde GitHub.")
             return df
-        except Exception as e:
-            st.error(f"No se pudieron cargar los datos locales: {e}")
+        except requests.RequestException as e:
+            st.error(f"No se pudo acceder a los datos en línea: {e}")
             return pd.DataFrame()
 
 
@@ -122,7 +123,8 @@ def main():
     
 
     st.sidebar.header("Configuración de Datos")
-    num_rows = st.sidebar.slider('Número de filas a cargar', min_value=10, max_value=3000, value=500, step=100)
+    num_rows = st.sidebar.number_input('Número de filas a cargar', min_value=10, max_value=3000, value=100, step=1)
+
 
     carga_mensaje = st.empty()
     carga_mensaje.info(f"Cargando {num_rows} filas de datos...")
@@ -169,7 +171,7 @@ def main():
             if st.button('Buscar vehículos similares'):
                 mostrar_vehiculo_seleccionado(df_filtrado, vin_seleccionado)
                 recomendaciones = dijkstra_algo(G, df_filtrado, vin_seleccionado, n=num_recomendaciones)
-                st.write(f"Top {num_recomendaciones} vehículos recomendados según la similitud en MSRP:")
+                st.write(f"**Top {num_recomendaciones} vehículos recomendados según la similitud en MSRP:**")
                 for recomendacion in recomendaciones:
                     with st.expander(f"{recomendacion['Make']} {recomendacion['Model']} {recomendacion['Year']}"):
                         st.write(f"VIN: {recomendacion['VIN']}")
