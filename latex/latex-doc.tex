@@ -144,8 +144,7 @@ El código Python es el siguiente:
     fontsize=\footnotesize,
     linenos
 ]{python}{../scripts-to-process-data/add-2NewColumns-modify1Column.py}
-\caption{Python script para agregar dos columnas nuevas y modificar una columna en una dataset.}
-\label{lst:add-2NewColumns-modify1Column}
+\caption{Python script para agregar dos columnas nuevas y modificar una columna en una dataset.}\label{lst:add-2NewColumns-modify1Column}
 \end{listing}
 
 
@@ -181,7 +180,7 @@ El propósito de recopilar y analizar este conjunto de datos es proporcionar rec
 
 \subsection{Identificación y representación de los nodos mediante grafos}
 
-En nuestro proyecto, planeamos crear un grafo que consiste en 166 801 nodos, los cuales representarán las propiedades de cada elemento. Para representar esta estructura gráfica, los nodos se conectarán entre sí en función de su similitud en la categoría principal (auto eléctrico), utilizando el algoritmo que se enseñó en clase. Todo este proceso se llevará a cabo utilizando el lenguaje de programación Python.
+En nuestro proyecto, planeamos crear un grafo que consiste en 3 000 nodos, los cuales representarán las propiedades de cada elemento. Para representar esta estructura gráfica, los nodos se conectarán entre sí en función de su similitud en la categoría principal (auto eléctrico), utilizando el algoritmo que se enseñó en clase. Todo este proceso se llevará a cabo utilizando el lenguaje de programación Python.
 
 
 
@@ -221,14 +220,13 @@ El objetivo de nuestro proyecto \textit{WatzzFinder} es desarrollar un sistema d
 Para este proyecto se estará utilizando técnicas de recorrido y búsqueda en grafos como la principal metodología debido a su eficiencia en manejar relaciones complejas. Se emplearán métodos específicos que incluyen:
 
 \begin{itemize}
-    \item \textbf{Búsqueda por Profundidad Limitada (DLS)} y \textbf{Búsqueda por Profundidad Iterativa (IDS)}: Estos métodos se aplicarán para explorar eficazmente el espacio de nodos del grafo, permitiendo identificar conexiones profundas entre características de vehículos. Dado que se procesará una gran cantidad de nodos (más de 160,000), estos métodos heurísticos son útiles para controlar la profundidad de búsqueda en grafos potencialmente grandes, asegurando que el sistema sea tanto eficiente como capaz de encontrar soluciones óptimas bajo restricciones específicas.
+    \item \textbf{Búsqueda por Profundidad Limitada (DLS)} y \textbf{Búsqueda por Profundidad Iterativa (IDS)}: Estos métodos se aplicarán para explorar eficazmente el espacio de nodos del grafo, permitiendo identificar conexiones profundas entre características de vehículos. Dado que se procesará una gran cantidad de nodos (más de 3000), estos métodos heurísticos son útiles para controlar la profundidad de búsqueda en grafos potencialmente grandes, asegurando que el sistema sea tanto eficiente como capaz de encontrar soluciones óptimas bajo restricciones específicas.
     \item \textbf{Algoritmo de Dijkstra modificado (A-Star)}: Se utilizará para encontrar el camino más corto o de menor costo entre dos nodos, lo que permite calcular las recomendaciones más relevantes basadas en múltiples factores ponderados. Este enfoque es dependiente de las diferentes características del carro electrónico. A su vez, se ha observado que en algunas modificaciones del algoritmo se ha utilizado para sistemas de recomendación de películas (Lubos, Fritscher, \& Kriz, 2013) de la siguiente manera:
     
     \begin{figure}[htbp]
         \centering
         \includegraphics[width=\textwidth]{./imgs-latex/ejemplo-casos1-DijkstraModificado.png}
-        \caption{Ejemplo de aplicación del algoritmo de Dijkstra modificado.}
-        \label{fig:ejemplo-casos1-DijkstraModificado}
+        \caption{Ejemplo de aplicación del algoritmo de Dijkstra modificado.}\label{fig:ejemplo-casos1-DijkstraModificado}
     \end{figure}
     
 \end{itemize}
@@ -255,7 +253,7 @@ La utilización de estos diferentes algoritmos en nuestro proyecto dependerá de
 
 \subsection{Algoritmos de Grafos de búsqueda}
 \begin{itemize}
-    \item Implementación de UCS y A-Star para calcular las rutas más eficientes en costos y características, facilitando recomendaciones personalizadas.
+    \item Implementación de A-Star para calcular las rutas más eficientes en costos y características, facilitando recomendaciones personalizadas.
     \item Aplicación de DLS y IDS para una exploración efectiva del grafo, identificando posibles recomendaciones basadas en la profundidad de búsqueda iterativa y limitada.
 \end{itemize}
 
@@ -263,7 +261,7 @@ La utilización de estos diferentes algoritmos en nuestro proyecto dependerá de
 \subsection{Implementación de código en Python}
 Se hará el uso de las siguientes librerías:
 \begin{itemize}
-    \item \textbf{NetworkX:} Se utilizará NetworkX, para la creación, manipulación y estudio de la estructura, dinámicas y funciones de grafos complejos. Esta herramienta es ideal para manejar nuestro grafo de 166 801 nodos. También será utilizado para calcular métricas de grafos, como la centralidad y la detección de comunidades.
+    \item \textbf{NetworkX:} Se utilizará NetworkX, para la creación, manipulación y estudio de la estructura, dinámicas y funciones de grafos complejos. Esta herramienta es ideal para manejar nuestro grafo de 3000 nodos. También será utilizado para calcular métricas de grafos, como la centralidad y la detección de comunidades.
     \item \textbf{Numpy:} Se utilizará Numpy para la generación de datos faltantes en las columnas que originalmente vienen en la dataset de Kaggle y para la generación de datos para las nuevas columnas.
     \item \textbf{Matplotlib:} Se utilizará para crear gráficos estadísticos informativos para poder realizar retroalimentaciones basadas en Métricas de Evaluación. Además de realizar los grafos necesarios que complementen NetworkX.
     \item \textbf{Pandas:} Se utilizará para la manipulación y gestión del conjunto de datos. Esta biblioteca facilitará la adición de nuevas columnas como 'Descuentos' y 'Precio Final', permitiendo la manipulación precisa de datos tabulares. Además, será utilizada para aplicar transformaciones específicas como el llenado de datos faltantes y la implementación de operaciones condicionales basadas en los valores existentes. Se prevé que se continuará utilizando dicha biblioteca para la manipulación general de los datos, análisis y modelado posterior de la dataset.
@@ -274,8 +272,53 @@ Se hará el uso de las siguientes librerías:
     \item Porcentaje de Usuarios que realizan compras basadas en Recomendaciones Personalizadas.
     \item Tiempo Promedio empleado en Búsqueda y recomendaciones calculando el tiempo medio que los usuario pasan desde que ingresan al sistema hasta que encuentren el vehículo finalmente comprado.
 \end{enumerate}
-\subsection{Big O - evaluacion con tiempos}
-tomar capturas de pantalla y calcular con diferentes soluciones y cantidad de nodos.
+\section{Big O}
+\textbf{Explicación}
+El algoritmo tiene estos pasos:
+\begin{itemize}
+    \item Calcular las distancias más cortas
+    \item Ordenar los vehículos
+    \item Seleccionar recomendaciones
+    \item Preparar resultados
+\end{itemize}
+
+\subsubsection{Complejidad (Big O)}
+\begin{itemize}
+    \item Calcular las distancias más cortas: El algoritmo de Dijkstra tiene una complejidad de $O(E\log V)$, donde $E$ es el número de aristas y $V$ es el número de vértices.
+    \item Ordenar los vehículos: Ordenar una lista de distancias tiene una complejidad de $O(V\log V)$.
+    \item Seleccionar recomendaciones: Seleccionar los primeros $n$ vehículos de la lista ordenada tiene una complejidad de $O(n)$.
+    \item Preparar resultados: Buscar y extraer información del DataFrame para cada recomendación tiene una complejidad de $O(n)$
+\end{itemize}
+
+Por lo tanto, la complejidad total del algoritmo está dominada por los pasos de Dijkstra y ordenación, resultando en $O(E\log V + V\log V)$.
+
+\subsubsection{Algoritmo de Floyd Warshall: Complejidad Temporal (Big O)}
+\begin{itemize}
+    \item Inicialización y asignación de pesos:
+    \begin{itemize}
+        \item Crear el diccionario node\_index tiene una complejidad de $O(n)$, donde $n$ es el número de nodos.
+        \item Llenar la matriz dist con pesos de aristas tiene una complejidad de $O(n^2)$
+    \end{itemize}
+    \item Algoritmo de Floyd-Warshall:
+    \begin{itemize}
+        \item El triple bucle for para actualizar las distancias tiene una complejidad de $O(n^3)$.
+    \end{itemize}
+    \item Generar resultados:
+    \begin{itemize}
+        \item Crear la lista de distancias tiene una complejidad de $O(n)$.
+        \item Ordenar la lista de distancias tiene una complejidad de $O(n\log n)$.
+        \item Seleccionar los primeros $n$ elementos y buscar en el DataFrame tiene una complejidad de $O(n)$.
+    \end{itemize}
+    \item Visualización del subgrafo:
+    \begin{itemize}
+        \item Generar el subgrafo tiene una complejidad de $O(n)$
+        \item Dibujar el grafo y sus elementos tiene una complejidad que depende del número de nodos y aristas en el subgrafo.
+    \end{itemize}
+\end{itemize}
+
+\section{Complejidad Total}
+La complejidad dominante es la del algoritmo de Floyd-Warshall: $O(n^3)$
+
 
 \subsection{Mejora continua y Evaluación de Feedback}
 \begin{itemize}
@@ -292,18 +335,21 @@ tomar capturas de pantalla y calcular con diferentes soluciones y cantidad de no
 Diagrama de Clases
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/diagramadeclases.png}\label{fig:diagramadeclases}
+    \includegraphics[width=\textwidth]{./imgs-latex/diagramadeclases.png}
+    \caption{Diagrama de Clases}\label{fig:diagramadeclases}
 \end{figure}
+
 
 Diagrama de Base de Datos
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/diagramadebase.png}\label{fig:diagramadebase}
+    \includegraphics[width=\textwidth]{./imgs-latex/diagramadebase.png}
+    \caption{Diagrama de Base}
+    \label{fig:diagramadebase}
 \end{figure}
 
 
-\subsection{Módulo para la adecuación de datos fuente a estructura de datos tipo grafo}
-\subsection{Módulo para la representación de datos en el grafo}
+
 \subsection{Interfaz tentativa (visual) para usuarios}
 
 Pantalla Principal
@@ -318,37 +364,43 @@ Opciones de Análisis
     \includegraphics[width=\textwidth]{./imgs-latex/img2.png}\label{fig:img2}
 \end{figure}
 
-Selecion de Vehículo por ID
+Selección de Vehículo por ID
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/img3.png}\label{fig:img3}
+    \includegraphics[width=\textwidth]{./imgs-latex/img3.png}
+    \caption{Selección de Vehículo por ID}
+    \label{fig:img3}
 \end{figure}
 
-Resultados de Búsqueda - Datos
+Resultados de Búsqueda \- Datos
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/img4.png}\label{fig:img4}
+    \includegraphics[width=\textwidth]{./imgs-latex/img4.png}
+    \caption{Resultados de Búsqueda \- Datos}
+    \label{fig:img4}
 \end{figure}
 
-Resultados de Búsqueda - Vehículos
+Resultados de Búsqueda \- Vehículos
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/img5.png}\label{fig:img5}
+    \includegraphics[width=\textwidth]{./imgs-latex/img5.png}
+    \caption{Resultados de Búsqueda \- Vehículos}
+    \label{fig:img5}
 \end{figure}
 
-Resultados de Búsqueda - Gráfo
+Resultados de Búsqueda \- Gráfo
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{./imgs-latex/img6.png}\label{fig:img6}
+    \includegraphics[width=\textwidth]{./imgs-latex/img6.png}
+    \caption{Resultados de Búsqueda \- Gráfo}
+    \label{fig:img6}
 \end{figure}
+
 
 Link de Prototipo:
 
 \url{https://app.visily.ai/projects/2326925d-fd9e-4656-ab45-2f8d65f10693/boards/569223}
 
-
-\section{Validación de resultados y pruebas}
-Validamos los resultados a través de\...
 
 \section{Conclusiones}
 La recomendación de vehículos es crucial en las ventas online, ya que ayuda a los usuarios a encontrar el auto adecuado según sus necesidades individuales. El uso de un sistema en grafos permite modelar las relaciones entre diferentes autos de manera eficiente, representando las similitudes entre ellos y permitiendo una comparación fácil para que los usuarios elijan según su presupuesto y necesidad.
