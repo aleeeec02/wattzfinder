@@ -49,23 +49,23 @@ def construir_grafo(df):
 
 
 def mostrar_vehiculo_seleccionado(df, vin):
+    global image_index  
     vehiculo = df[df['VIN (1-10)'] == vin].iloc[0]
-    st.subheader(f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Precio Base", f"${vehiculo['Base MSRP']:,.2f}")
-    col2.metric("Rango Eléctrico", f"{vehiculo['Electric Range']} millas")
-    col3.metric("Tipo", vehiculo['Electric Vehicle Type'])
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown(f"**Marca:** {vehiculo['Make']}")
-        st.markdown(f"**Modelo:** {vehiculo['Model']}")
-        st.markdown(f"**Año:** {vehiculo['Model Year']}")
-        st.markdown(f"**Tipo:** {vehiculo['Electric Vehicle Type']}")
-    with col2:
-        st.markdown(f"**Rango Eléctrico:** {vehiculo['Electric Range']} millas")
-        st.markdown(f"**Precio Base:** ${vehiculo['Base MSRP']:,.2f}")
-        st.markdown(f"**Ciudad:** {vehiculo['City']}")
-        st.markdown(f"**Estado:** {vehiculo['State']}")
+    with st.container():
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            if image_paths:
+                image_file = image_paths[image_index % len(image_paths)]
+                st.image(image_file, caption=f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}")
+                image_index += 1 
+        with col2:
+            st.subheader(f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}")
+            st.metric("Precio Base", f"${vehiculo['Base MSRP']:,.2f}")
+            st.metric("Rango Eléctrico", f"{vehiculo['Electric Range']} millas")
+            st.text(f"Tipo: {vehiculo['Electric Vehicle Type']}")
+            st.text(f"Ciudad: {vehiculo['City']}")
+            st.text(f"Estado: {vehiculo['State']}")
+
 
 
 
@@ -396,8 +396,10 @@ def main():
 
 
     if st.session_state.get('run_dijkstra', False) and 'selected_vin' in st.session_state:
+        mostrar_vehiculo_seleccionado(df_filtrado, st.session_state['selected_vin'])
+
         vin_seleccionado = st.session_state['selected_vin']
-        mostrar_vehiculo_seleccionado(df_filtrado, vin_seleccionado)
+        mostrar_vehiculo_seleccionado(df_filtrado, st.session_state['selected_vin'])
         recomendaciones = dijkstra_algo(G, df_filtrado, vin_seleccionado, n=st.session_state.get('num_recomendaciones', 5))
         st.write(f"**Top {st.session_state['num_recomendaciones']} vehículos recomendados según la similitud en MSRP:**")
         for recomendacion in recomendaciones:
