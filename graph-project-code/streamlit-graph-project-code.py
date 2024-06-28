@@ -66,15 +66,19 @@ def mostrar_vehiculo_seleccionado(df, vin):
 
 
 
-
 def aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max, marcas):
-    return df[(df['Electric Range'] >= rango_min) & 
-              (df['Electric Range'] <= rango_max) & 
-              (df['Base MSRP'] >= precio_min) & 
-              (df['Base MSRP'] <= precio_max) &
-               df['Make'].isin(marcas)
+    df_filtrado = df[
+        (df['Electric Range'] >= rango_min) & 
+        (df['Electric Range'] <= rango_max) & 
+        (df['Base MSRP'] >= precio_min) & 
+        (df['Base MSRP'] <= precio_max)
+    ]
 
-              ]
+    if marcas:
+        df_filtrado = df_filtrado[df_filtrado['Make'].isin(marcas)]
+    
+    return df_filtrado
+
 
 
 def dijkstra_algo(G, df, vin_inicio, n=5):
@@ -228,14 +232,48 @@ def visualizar_grafo(G, destacados=None, comunidades=None):
     plt.title("Grafo de Vehículos Eléctricos")
     return fig
 
+def guardar_estado_sesion(key):
+    def inner():
+        if key in st.session_state:
+            st.session_state[key] = st.session_state[key]
+    return inner
+
+
+
+def cargar_estado_sesion(key, default):
+    return st.session_state.get(key, default)
+
+
 
 
 def main():
+    if 'num_rows' not in st.session_state:
+        st.session_state['num_rows'] = 100
+    if 'marcas_seleccionadas' not in st.session_state:
+        st.session_state['marcas_seleccionadas'] = []
+    if 'rango_min' not in st.session_state:
+        st.session_state['rango_min'] = 0
+    if 'rango_max' not in st.session_state:
+        st.session_state['rango_max'] = 300
+    if 'precio_min' not in st.session_state:
+        st.session_state['precio_min'] = 0
+    if 'precio_max' not in st.session_state:
+        st.session_state['precio_max'] = 100000
+    if 'num_recomendaciones' not in st.session_state:
+        st.session_state['num_recomendaciones'] = 5
+
     st.title('Wattzfinder: Sistema de Recomendación de Vehículos Eléctricos')
     
 
     st.sidebar.header("Configuración de Datos")
-    num_rows = st.sidebar.number_input('Número de filas a cargar', min_value=10, max_value=3000, value=100, step=1)
+    num_rows = st.sidebar.number_input(
+                'Número de filas a cargar', 
+                min_value=10, 
+                max_value=3000, 
+                value=st.session_state['num_rows'],
+                step=1,
+                on_change=guardar_estado_sesion('num_rows')
+            )
 
 
     carga_mensaje = st.empty()
@@ -255,27 +293,39 @@ def main():
         marcas_seleccionadas = st.sidebar.multiselect(
             'Seleccione las marcas',
             options=todas_las_marcas,
-            default=todas_las_marcas
+            default=cargar_estado_sesion('marcas_seleccionadas', todas_las_marcas),
+            on_change=guardar_estado_sesion('marcas_seleccionadas')
         )
 
-        
+
         rango_min, rango_max = st.sidebar.slider(
             'Rango Eléctrico (millas)', 
             float(df['Electric Range'].min()), 
             float(df['Electric Range'].max()), 
-            (float(df['Electric Range'].min()), float(df['Electric Range'].max()))
+            value=cargar_estado_sesion('rango_electrico', (float(df['Electric Range'].min()), float(df['Electric Range'].max()))),
+            on_change=guardar_estado_sesion('rango_electrico')
         )
         
+
+
         precio_min, precio_max = st.sidebar.slider(
             'Precio Base (USD)', 
             float(df['Base MSRP'].min()), 
             float(df['Base MSRP'].max()), 
-            (float(df['Base MSRP'].min()), float(df['Base MSRP'].max()))
+            value=cargar_estado_sesion('rango_precio', (float(df['Base MSRP'].min()), float(df['Base MSRP'].max()))),
+            on_change=guardar_estado_sesion('rango_precio')
         )
+
         
 
-        num_recomendaciones = st.sidebar.slider('Número de recomendaciones', min_value=1, max_value=10, value=5)
-        
+        num_recomendaciones = st.sidebar.slider('Número de recomendaciones', 
+                    min_value=1, 
+                    max_value=10, 
+                    value=cargar_estado_sesion('num_recomendaciones', 5),
+                    on_change=guardar_estado_sesion('num_recomendaciones'))
+
+
+
         df_filtrado = aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max, marcas_seleccionadas)
 
         st.write(f"Número de vehículos después de filtrar: {len(df_filtrado)}")
