@@ -7,6 +7,9 @@ import numpy as np
 import time
 import requests
 import os
+import random
+
+
 from collections import deque
 
 
@@ -151,63 +154,40 @@ def bfs_vehiculos_similares(G, df, query, num_resultados=6, offset=0):
     resultados_ordenados = sorted(resultados, key=lambda x: (-x[2], x[1]))
     return resultados_ordenados[offset:offset+num_resultados]
 
+def load_image_paths(img_folder='../car-imgs'):
+    return [os.path.join(img_folder, img) for img in os.listdir(img_folder) if img.endswith(('.png', '.jpg', '.jpeg', 'webp'))]
 
-def bfs_vehiculos_similares(G, df, query, num_resultados=6, offset=0):
-    query = query.lower()
-    resultados = []
-    visitados = set()
+image_paths = load_image_paths()
+random.shuffle(image_paths)
+image_index = 0
 
-    def calcular_puntuacion(vehiculo):
-        puntuacion = 0
-        nombre_completo = f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}".lower()
-        if query in nombre_completo:
-            puntuacion += 5
-        if query in vehiculo['Make'].lower():
-            puntuacion += 3
-        if query in vehiculo['Model'].lower():
-            puntuacion += 2
-        if query in str(vehiculo['Model Year']).lower():
-            puntuacion += 1
-        if query in vehiculo['VIN (1-10)'].lower():
-            puntuacion += 4
-        return puntuacion
 
-    for start_node in G.nodes():
-        if start_node in visitados:
-            continue
-        
-        cola = deque([(start_node, 0)])
-        while cola:
-            node, distancia = cola.popleft()
-            if node not in visitados:
-                visitados.add(node)
-                vehiculo = df[df['VIN (1-10)'] == node].iloc[0]
-                puntuacion = calcular_puntuacion(vehiculo)
-                
-                if puntuacion > 0:
-                    resultados.append((node, distancia, puntuacion))
-                
-                for vecino in G.neighbors(node):
-                    if vecino not in visitados:
-                        cola.append((vecino, distancia + 1))
-        
-        if len(resultados) >= num_resultados * 3:
-            break
-
-    resultados_ordenados = sorted(resultados, key=lambda x: (-x[2], x[1]))
-    return resultados_ordenados[offset:offset+num_resultados]
 
 def mostrar_resultados(df, resultados):
-    for vin, _, _ in resultados:
+    global image_index
+
+    for index, (vin, _, _) in enumerate(resultados):
         vehiculo = df[df['VIN (1-10)'] == vin].iloc[0]
-        with st.expander(f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}"):
-            st.write(f"VIN: {vin}")
-            st.write(f"Marca: {vehiculo['Make']}")
-            st.write(f"Modelo: {vehiculo['Model']}")
-            st.write(f"Año: {vehiculo['Model Year']}")
-            st.write(f"Autonomía eléctrica: {vehiculo['Electric Range']} millas")
-            st.write(f"Precio base: ${vehiculo['Base MSRP']:,.2f}")
-            st.write(f"Tipo de vehículo eléctrico: {vehiculo['Electric Vehicle Type']}")
+        with st.container():
+            col1, col2 = st.columns([1, 3])
+            with col1:
+                if image_paths:
+
+                    image_file = image_paths[image_index]
+                    st.image(image_file, caption=f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}")
+                    image_index = (image_index + 1) % len(image_paths)  
+            with col2:
+                st.subheader(f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}")
+                if st.button(f"Seleccionar {vin}", key=f"select_{vin}_{index}"):
+                    st.session_state['selected_vin'] = vin
+                    st.session_state['run_dijkstra'] = True
+                st.write(f"Marca: {vehiculo['Make']}")
+                st.write(f"Modelo: {vehiculo['Model']}")
+                st.write(f"Año: {vehiculo['Model Year']}")
+                st.write(f"Autonomía eléctrica: {vehiculo['Electric Range']} millas")
+                st.write(f"Precio base: ${vehiculo['Base MSRP']:,.2f}")
+                st.write(f"Tipo de vehículo eléctrico: {vehiculo['Electric Vehicle Type']}")
+
 
 
 def detectar_comunidades(G):
@@ -357,8 +337,8 @@ def main():
                         st.write(f"Tipo de vehículo eléctrico: {recomendacion['Electric Vehicle Type']}")
                         st.write(f"Diferencia de MSRP: ${recomendacion['Diferencia MSRP']:,.2f}")
                 
-                fig = visualizar_grafo(G, destacados=[r['VIN'] for r in recomendaciones] + [vin_seleccionado])
-                st.pyplot(fig)
+                #fig = visualizar_grafo(G, destacados=[r['VIN'] for r in recomendaciones] + [vin_seleccionado])
+                #st.pyplot(fig)
 
         elif opcion == "Detección de Comunidades":
             if st.button('Detectar Comunidades'):
@@ -399,12 +379,42 @@ def main():
     if query:
         if 'offset' not in st.session_state:
             st.session_state.offset = 0
+        
+        resultados = bfs_vehiculos_similares(G, df_filtrado, query, num_resultados=6, offset=st.session_state.offset)
+        
+        if resultados:
+            mostrar_resultados(df_filtrado, resultados)
+            col1, col2 = st.columns(2)
+            if col1.button("Anterior", key="btn_anterior") and st.session_state.offset > 0:
+                st.session_state.offset -= 6
+            if col2.button("Siguiente", key="btn_siguiente"):
+                st.session_state.offset += 6
+        else:
+            st.write("No se encontraron resultados.")
+            if st.session_state.offset > 0:
+                st.session_state.offset -= 6
 
-        col1, col2 = st.columns(2)
-        if col1.button("Anterior") and st.session_state.offset > 0:
-            st.session_state.offset -= 6
-        if col2.button("Siguiente"):
-            st.session_state.offset += 6
+
+    if st.session_state.get('run_dijkstra', False) and 'selected_vin' in st.session_state:
+        vin_seleccionado = st.session_state['selected_vin']
+        mostrar_vehiculo_seleccionado(df_filtrado, vin_seleccionado)
+        recomendaciones = dijkstra_algo(G, df_filtrado, vin_seleccionado, n=st.session_state.get('num_recomendaciones', 5))
+        st.write(f"**Top {st.session_state['num_recomendaciones']} vehículos recomendados según la similitud en MSRP:**")
+        for recomendacion in recomendaciones:
+            with st.expander(f"{recomendacion['Make']} {recomendacion['Model']} {recomendacion['Year']}"):
+                st.write(f"VIN: {recomendacion['VIN']}")
+                st.write(f"Marca: {recomendacion['Make']}")
+                st.write(f"Modelo: {recomendacion['Model']}")
+                st.write(f"Año: {recomendacion['Year']}")
+                st.write(f"Autonomía eléctrica: {recomendacion['Electric Range']} millas")
+                st.write(f"Precio base: ${recomendacion['Base MSRP']:,.2f}")
+                st.write(f"Tipo de vehículo eléctrico: {recomendacion['Electric Vehicle Type']}")
+                st.write(f"Diferencia de MSRP: ${recomendacion['Diferencia MSRP']:,.2f}")
+        
+        fig = visualizar_grafo(G, destacados=[r['VIN'] for r in recomendaciones] + [vin_seleccionado])
+        st.pyplot(fig)
+        st.session_state['run_dijkstra'] = False
+        
 
         resultados = bfs_vehiculos_similares(G, df_filtrado, query, num_resultados=6, offset=st.session_state.offset)
         
