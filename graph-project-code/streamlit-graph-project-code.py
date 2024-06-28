@@ -7,6 +7,7 @@ import numpy as np
 import time
 import requests
 import os
+from collections import deque
 
 
 def cargar_datos(num_rows=100):
@@ -28,6 +29,8 @@ def cargar_datos(num_rows=100):
         except Exception as e:
             st.error(f"No se pudieron cargar los datos locales: {e}")
             return pd.DataFrame()
+
+
 
 
 
@@ -64,11 +67,14 @@ def mostrar_vehiculo_seleccionado(df, vin):
 
 
 
-def aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max):
+def aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max, marcas):
     return df[(df['Electric Range'] >= rango_min) & 
               (df['Electric Range'] <= rango_max) & 
               (df['Base MSRP'] >= precio_min) & 
-              (df['Base MSRP'] <= precio_max)]
+              (df['Base MSRP'] <= precio_max) &
+               df['Make'].isin(marcas)
+
+              ]
 
 
 def dijkstra_algo(G, df, vin_inicio, n=5):
@@ -92,6 +98,112 @@ def dijkstra_algo(G, df, vin_inicio, n=5):
             'Diferencia MSRP': diferencia
         })
     return resultados
+
+
+
+
+def bfs_vehiculos_similares(G, df, query, num_resultados=6, offset=0):
+    query = query.lower()
+    resultados = []
+    visitados = set()
+
+    def calcular_puntuacion(vehiculo):
+        puntuacion = 0
+        nombre_completo = f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}".lower()
+        if query in nombre_completo:
+            puntuacion += 5
+        if query in vehiculo['Make'].lower():
+            puntuacion += 3
+        if query in vehiculo['Model'].lower():
+            puntuacion += 2
+        if query in str(vehiculo['Model Year']).lower():
+            puntuacion += 1
+        if query in vehiculo['VIN (1-10)'].lower():
+            puntuacion += 4
+        return puntuacion
+
+    for start_node in G.nodes():
+        if start_node in visitados:
+            continue
+        
+        cola = deque([(start_node, 0)])
+        while cola:
+            node, distancia = cola.popleft()
+            if node not in visitados:
+                visitados.add(node)
+                vehiculo = df[df['VIN (1-10)'] == node].iloc[0]
+                puntuacion = calcular_puntuacion(vehiculo)
+                
+                if puntuacion > 0:
+                    resultados.append((node, distancia, puntuacion))
+                
+                for vecino in G.neighbors(node):
+                    if vecino not in visitados:
+                        cola.append((vecino, distancia + 1))
+        
+        if len(resultados) >= num_resultados * 3:
+            break
+
+    resultados_ordenados = sorted(resultados, key=lambda x: (-x[2], x[1]))
+    return resultados_ordenados[offset:offset+num_resultados]
+
+
+def bfs_vehiculos_similares(G, df, query, num_resultados=6, offset=0):
+    query = query.lower()
+    resultados = []
+    visitados = set()
+
+    def calcular_puntuacion(vehiculo):
+        puntuacion = 0
+        nombre_completo = f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}".lower()
+        if query in nombre_completo:
+            puntuacion += 5
+        if query in vehiculo['Make'].lower():
+            puntuacion += 3
+        if query in vehiculo['Model'].lower():
+            puntuacion += 2
+        if query in str(vehiculo['Model Year']).lower():
+            puntuacion += 1
+        if query in vehiculo['VIN (1-10)'].lower():
+            puntuacion += 4
+        return puntuacion
+
+    for start_node in G.nodes():
+        if start_node in visitados:
+            continue
+        
+        cola = deque([(start_node, 0)])
+        while cola:
+            node, distancia = cola.popleft()
+            if node not in visitados:
+                visitados.add(node)
+                vehiculo = df[df['VIN (1-10)'] == node].iloc[0]
+                puntuacion = calcular_puntuacion(vehiculo)
+                
+                if puntuacion > 0:
+                    resultados.append((node, distancia, puntuacion))
+                
+                for vecino in G.neighbors(node):
+                    if vecino not in visitados:
+                        cola.append((vecino, distancia + 1))
+        
+        if len(resultados) >= num_resultados * 3:
+            break
+
+    resultados_ordenados = sorted(resultados, key=lambda x: (-x[2], x[1]))
+    return resultados_ordenados[offset:offset+num_resultados]
+
+def mostrar_resultados(df, resultados):
+    for vin, _, _ in resultados:
+        vehiculo = df[df['VIN (1-10)'] == vin].iloc[0]
+        with st.expander(f"{vehiculo['Make']} {vehiculo['Model']} {vehiculo['Model Year']}"):
+            st.write(f"VIN: {vin}")
+            st.write(f"Marca: {vehiculo['Make']}")
+            st.write(f"Modelo: {vehiculo['Model']}")
+            st.write(f"Año: {vehiculo['Model Year']}")
+            st.write(f"Autonomía eléctrica: {vehiculo['Electric Range']} millas")
+            st.write(f"Precio base: ${vehiculo['Base MSRP']:,.2f}")
+            st.write(f"Tipo de vehículo eléctrico: {vehiculo['Electric Vehicle Type']}")
 
 
 def detectar_comunidades(G):
@@ -129,15 +241,23 @@ def main():
     carga_mensaje = st.empty()
     carga_mensaje.info(f"Cargando {num_rows} filas de datos...")
 
-
     df = cargar_datos(num_rows=num_rows)
     time.sleep(1)
-
-
     carga_mensaje.success(f"Se han cargado {len(df)} filas de datos.")
     
+
+
+
     if not df.empty:
         st.sidebar.header("Filtros y Opciones")
+        
+        todas_las_marcas = sorted(df['Make'].unique())
+        marcas_seleccionadas = st.sidebar.multiselect(
+            'Seleccione las marcas',
+            options=todas_las_marcas,
+            default=todas_las_marcas
+        )
+
         
         rango_min, rango_max = st.sidebar.slider(
             'Rango Eléctrico (millas)', 
@@ -156,7 +276,9 @@ def main():
 
         num_recomendaciones = st.sidebar.slider('Número de recomendaciones', min_value=1, max_value=10, value=5)
         
-        df_filtrado = aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max)
+        df_filtrado = aplicar_filtros(df, rango_min, rango_max, precio_min, precio_max, marcas_seleccionadas)
+
+        st.write(f"Número de vehículos después de filtrar: {len(df_filtrado)}")
         
         G = construir_grafo(df_filtrado)
         
@@ -220,7 +342,29 @@ def main():
                 fig = visualizar_grafo(G, destacados=[vin for vin, _ in vecinos] + [vin_seleccionado])
                 st.pyplot(fig)
 
+    query = st.text_input("Buscar vehículos:", "")
 
+
+    
+    if query:
+        if 'offset' not in st.session_state:
+            st.session_state.offset = 0
+
+        col1, col2 = st.columns(2)
+        if col1.button("Anterior") and st.session_state.offset > 0:
+            st.session_state.offset -= 6
+        if col2.button("Siguiente"):
+            st.session_state.offset += 6
+
+        resultados = bfs_vehiculos_similares(G, df_filtrado, query, num_resultados=6, offset=st.session_state.offset)
+        
+        if resultados:
+            st.write(f"Mostrando resultados {st.session_state.offset + 1} - {st.session_state.offset + len(resultados)}")
+            mostrar_resultados(df_filtrado, resultados)
+        else:
+            st.write("No se encontraron más resultados.")
+            if st.session_state.offset > 0:
+                st.session_state.offset -= 6
     
     else:
         st.error("Los datos no están disponibles.")
