@@ -9,7 +9,6 @@ import requests
 import os
 import random
 
-
 from collections import deque
 
 
@@ -206,7 +205,7 @@ def visualizar_grafo(G, destacados=None, comunidades=None):
         nx.draw(G, pos, node_color=[comunidades[node] for node in G.nodes()], 
                 with_labels=True, cmap=plt.cm.rainbow, node_size=300, ax=ax)
     else:
-        nx.draw(G, pos, with_labels=True, node_color='deepskyblue', edge_color='magenta', node_size=300, ax=ax)
+        nx.draw(G, pos, with_labels=True, node_color='springgreen', edge_color='mediumvioletred', node_size=300, ax=ax)
     if destacados:
         nx.draw_networkx_nodes(G, pos, nodelist=destacados, node_color='red', node_size=500, ax=ax)
     plt.title("Grafo de Vehículos Eléctricos")
@@ -337,8 +336,8 @@ def main():
                         st.write(f"Tipo de vehículo eléctrico: {recomendacion['Electric Vehicle Type']}")
                         st.write(f"Diferencia de MSRP: ${recomendacion['Diferencia MSRP']:,.2f}")
                 
-                #fig = visualizar_grafo(G, destacados=[r['VIN'] for r in recomendaciones] + [vin_seleccionado])
-                #st.pyplot(fig)
+                fig = visualizar_grafo(G, destacados=[r['VIN'] for r in recomendaciones] + [vin_seleccionado])
+                st.pyplot(fig)
 
         elif opcion == "Detección de Comunidades":
             if st.button('Detectar Comunidades'):
@@ -350,6 +349,7 @@ def main():
                 
                 fig = visualizar_grafo(G, comunidades=comunidades)
                 st.pyplot(fig)
+
         elif opcion == "Vecinos Más Cercanos":
             if st.button('Encontrar Vecinos Más Cercanos'):
                 vecinos = vecinos_mas_cercanos(G, vin_seleccionado)
@@ -401,6 +401,7 @@ def main():
         vin_seleccionado = st.session_state['selected_vin']
         mostrar_vehiculo_seleccionado(df_filtrado, st.session_state['selected_vin'])
         recomendaciones = dijkstra_algo(G, df_filtrado, vin_seleccionado, n=st.session_state.get('num_recomendaciones', 5))
+        
         st.write(f"**Top {st.session_state['num_recomendaciones']} vehículos recomendados según la similitud en MSRP:**")
         for recomendacion in recomendaciones:
             with st.expander(f"{recomendacion['Make']} {recomendacion['Model']} {recomendacion['Year']}"):
@@ -429,7 +430,7 @@ def main():
                 st.session_state.offset -= 6
     
     else:
-        st.error("Los datos no están disponibles.")
+        st.write("")
 
 if __name__ == "__main__":
     main()
